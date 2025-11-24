@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>2048 — Практическая работа</title>
   <link rel="stylesheet" href="src/css/styles.css">
-  <meta name="description" content="Веб-версия игры 2048. Сохранение сессии, undo, лидерборд в localStorage. Без фреймворков и без innerHTML/outerHTML." />
+  <meta name="description" content="Веб-версия игры 2048." />
 </head>
 <body>
   <header class="header">
@@ -40,7 +40,7 @@
 
     <aside class="info">
       <p>Управление: стрелки на клавиатуре (десктоп). На мобильных — виртуальные кнопки или свайпы.</p>
-      <p>При завершении игры появится форма для сохранения результата в таблицу лидеров (top‑10, localStorage).</p>
+      <p>При завершении игры появится форма для сохранения результата в таблицу лидеров.</p>
     </aside>
   </main>
 
@@ -69,7 +69,6 @@
           <tr><th>Место</th><th>Имя</th><th>Очки</th><th>Дата</th></tr>
         </thead>
         <tbody>
-          <!-- Строки создаются через JS -->
         </tbody>
       </table>
       <div class="modal-actions">
@@ -88,3 +87,4 @@
   <script src="src/js/app.js" defer></script>
 </body>
 </html>
+
