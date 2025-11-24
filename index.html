@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>2048 — Практическая работа</title>
+  <link rel="stylesheet" href="src/css/styles.css">
+  <meta name="description" content="Веб-версия игры 2048. Сохранение сессии, undo, лидерборд в localStorage. Без фреймворков и без innerHTML/outerHTML." />
+</head>
+<body>
+  <header class="header">
+    <h1 class="title">2048</h1>
+    <div class="meta">
+      <div class="score-block" aria-live="polite">
+        <div>Очки</div>
+        <div id="score">0</div>
+      </div>
+      <div class="controls-top">
+        <button id="btn-undo" aria-label="Отменить ход">⟲</button>
+        <button id="btn-restart" aria-label="Начать заново">⟳</button>
+        <button id="btn-leaderboard" aria-label="Таблица лидеров">🏆</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <section id="game-container" class="game-container" aria-label="Игровое поле">
+      <div id="grid" class="grid" role="grid" aria-hidden="false"></div>
+    </section>
+
+    <nav id="mobile-controls" class="mobile-controls" aria-hidden="true">
+      <button data-dir="up" class="mobile-btn">↑</button>
+      <div class="mobile-row">
+        <button data-dir="left" class="mobile-btn">←</button>
+        <button data-dir="down" class="mobile-btn">↓</button>
+        <button data-dir="right" class="mobile-btn">→</button>
+      </div>
+    </nav>
+
+    <aside class="info">
+      <p>Управление: стрелки на клавиатуре (десктоп). На мобильных — виртуальные кнопки или свайпы.</p>
+      <p>При завершении игры появится форма для сохранения результата в таблицу лидеров (top‑10, localStorage).</p>
+    </aside>
+  </main>
+
+  <div id="modal-gameover" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content">
+      <h2 id="modal-title">Игра окончена</h2>
+      <p id="modal-message">Вы набрали <span id="final-score">0</span> очков.</p>
+      <div id="save-area" class="save-area">
+        <label for="player-name">Имя:</label>
+        <input id="player-name" type="text" maxlength="30" autocomplete="name" />
+        <button id="btn-save-score">Сохранить результат</button>
+      </div>
+      <div id="saved-message" class="saved-message" hidden>Ваш рекорд сохранен.</div>
+      <div class="modal-actions">
+        <button id="btn-restart-from-modal">Начать заново</button>
+        <button id="btn-close-modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-leaderboard" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content leaderboard-content">
+      <h2>Таблица лидеров — Топ 10</h2>
+      <table id="leaderboard-table" class="leaderboard-table">
+        <thead>
+          <tr><th>Место</th><th>Имя</th><th>Очки</th><th>Дата</th></tr>
+        </thead>
+        <tbody>
+          <!-- Строки создаются через JS -->
+        </tbody>
+      </table>
+      <div class="modal-actions">
+        <button id="btn-clear-leaderboard">Очистить</button>
+        <button id="btn-close-leaderboard">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!--Подключение скриптов-->
+  <script src="src/js/utils.js" defer></script>
+  <script src="src/js/storage.js" defer></script>
+  <script src="src/js/game.js" defer></script>
+  <script src="src/js/renderer.js" defer></script>
+  <script src="src/js/controls.js" defer></script>
+  <script src="src/js/app.js" defer></script>
+</body>
+</html>
