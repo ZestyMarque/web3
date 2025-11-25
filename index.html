@@ -3,66 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2048</title>
-    <link rel="stylesheet" href="style.css">
+    <title>2048 Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #faf8ef;
+        }
+        #game-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #bbada0;
+            border-radius: 10px;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 400px;
+            background-color: #bbada0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .tile {
+            width: 100%;
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            border-radius: 5px;
+            background-color: #cdc1b4;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        #score {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+        #game-over-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 100;
+        }
+        #game-over-content {
+            background-color: #bbada0;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        #leaderboard {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 400px;
+            background-color: #bbada0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #8f7a66;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #name-input {
+            padding: 10px;
+            margin: 10px 0;
+            width: 80%;
+            max-width: 300px;
+        }
+        .controls {
+            display: none;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 300px;
+        }
+        @media (max-width: 768px) {
+            .controls {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header class="header">
-        <h1 class="title">2048</h1>
-        <div class="score-container">
-            <div class="score-title">Счёт</div>
-            <div id="score">0</div>
+    <div id="game-container">
+        <h1>2048</h1>
+        <div id="score">Счёт: 0</div>
+        <div id="board"></div>
+        <div class="controls">
+            <button id="up">↑</button>
+            <button id="right">→</button>
+            <button id="down">↓</button>
+            <button id="left">←</button>
         </div>
-        <div class="buttons">
-            <button id="new-game">Новая игра</button>
-            <button id="undo">↺ Отменить</button>
-            <button id="leaderboard-btn">Лидеры</button>
+        <button id="undo">Отменить ход</button>
+        <button id="restart">Начать заново</button>
+        <div id="leaderboard">
+            <h2>Лидерборд</h2>
+            <table id="leaderboard-table"></table>
         </div>
-    </header>
-
-    <main>
-        <div id="game-container"></div>
-        <div id="mobile-controls" class="hidden">
-            <button data-dir="up">Up</button>
-            <button data-dir="left">Left</button>
-            <button data-dir="down">Down</button>
-            <button data-dir="right">Right</button>
-        </div>
-    </main>
-
-    <!-- Game Over -->
-    <div id="game-over" class="modal hidden">
-        <div class="modal-content">
+    </div>
+    <div id="game-over-modal">
+        <div id="game-over-content">
             <h2>Игра окончена!</h2>
             <p>Ваш счёт: <span id="final-score">0</span></p>
-            <div id="name-input-container">
-                <input type="text" id="player-name" placeholder="Ваше имя" maxlength="20">
-                <button id="save-score">Сохранить</button>
-            </div>
-            <p id="saved-message" class="hidden">Рекорд сохранён!</p>
-            <button id="restart">Начать заново</button>
+            <input type="text" id="name-input" placeholder="Введите ваше имя">
+            <button id="save-score">Сохранить результат</button>
+            <button id="restart-from-modal">Начать заново</button>
         </div>
     </div>
-
-    <!-- Лидерборд -->
-    <div id="leaderboard" class="modal hidden">
-        <div class="modal-content">
-            <h2>Таблица лидеров</h2>
-            <table id="leaderboard-table">
-                <thead><tr><th>№</th><th>Имя</th><th>Счёт</th><th>Дата</th></tr></thead>
-                <tbody></tbody>
-            </table>
-            <button id="close-leaderboard">Закрыть</button>
-        </div>
-        </div>
-    </div>
-
-    <!-- Подключаем скрипты -->
-    <script type="module" src="js/utils.js"></script>
-    <script type="module" src="js/storage.js"></script>
-    <script type="module" src="js/renderer.js"></script>
-    <script type="module" src="js/game.js"></script>
-    <script type="module" src="js/controls.js"></script>
-    <script type="module" src="js/app.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
