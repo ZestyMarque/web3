@@ -21,7 +21,7 @@ export function getLeaders() {
 
 export function saveLeader(name, score) {
     const leaders = getLeaders();
-    const date = new Date().toLocaleDateString('ru-RU');
+    const date = new Date().toLocaleString('ru-RU');
     leaders.push({ name: name.trim() || 'Аноним', score, date });
     leaders.sort((a, b) => b.score - a.score);
     const top10 = leaders.slice(0, 10);
