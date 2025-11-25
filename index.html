@@ -4,76 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2048</title>
-    <link rel="stylesheet" href="src/css/styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="header">
         <h1 class="title">2048</h1>
-        
         <div class="score-container">
             <div class="score-title">Счёт</div>
             <div id="score">0</div>
         </div>
-
         <div class="buttons">
             <button id="new-game">Новая игра</button>
-            <button id="undo">↺ Отменить ход</button>
+            <button id="undo">↺ Отменить</button>
             <button id="leaderboard-btn">Лидеры</button>
         </div>
     </header>
 
     <main>
         <div id="game-container"></div>
-
         <div id="mobile-controls" class="hidden">
-            <button data-dir="up">↑</button>
-            <button data-dir="left">←</button>
-            <button data-dir="down">↓</button>
-            <button data-dir="right">→</button>
+            <button data-dir="up">Up</button>
+            <button data-dir="left">Left</button>
+            <button data-dir="down">Down</button>
+            <button data-dir="right">Right</button>
         </div>
     </main>
 
+    <!-- Game Over -->
     <div id="game-over" class="modal hidden">
         <div class="modal-content">
             <h2>Игра окончена!</h2>
-            <p id="final-score-text">Ваш счёт: <span id="final-score">0</span></p>
-            
+            <p>Ваш счёт: <span id="final-score">0</span></p>
             <div id="name-input-container">
-                <input type="text" id="player-name" placeholder="Введите ваше имя" maxlength="20">
-                <button id="save-score">Сохранить результат</button>
+                <input type="text" id="player-name" placeholder="Ваше имя" maxlength="20">
+                <button id="save-score">Сохранить</button>
             </div>
-            
-            <p id="saved-message" class="hidden">Ваш рекорд сохранён!</p>
-            
-            <button id="restart" class="restart-btn">Начать заново</button>
-        </div>
-    </div>
-    <div id="leaderboard" class="modal hidden">
-        <div class="modal-content">
-            <h2>Таблица лидеров</h2>
-            
-            <table id="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>№</th>
-                        <th>Имя</th>
-                        <th>Счёт</th>
-                        <th>Дата</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-            
-            <button id="close-leaderboard">Закрыть</button>
+            <p id="saved-message" class="hidden">Рекорд сохранён!</p>
+            <button id="restart">Начать заново</button>
         </div>
     </div>
 
-    <script type="module" src="src/js/utils.js"></script>
-    <script type="module" src="src/js/storage.js"></script>
-    <script type="module" src="src/js/game.js"></script>
-    <script type="module" src="src/js/renderer.js"></script>
-    <script type="module" src="src/js/controls.js"></script>
-    <script type="module" src="src/js/app.js"></script>
+    <!-- Лидерборд -->
+    <div id="leaderboard" class="modal hidden">
+        <div class="modal-content">
+            <h2>Таблица лидеров</h2>
+            <table id="leaderboard-table">
+                <thead><tr><th>№</th><th>Имя</th><th>Счёт</th><th>Дата</th></tr></thead>
+                <tbody></tbody>
+            </table>
+            <button id="close-leaderboard">Закрыть</button>
+        </div>
+        </div>
+    </div>
+
+    <!-- Подключаем скрипты -->
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/storage.js"></script>
+    <script type="module" src="js/renderer.js"></script>
+    <script type="module" src="js/game.js"></script>
+    <script type="module" src="js/controls.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
