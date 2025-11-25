@@ -1,183 +1,101 @@
+// src/js/game.js
 import { deepCopy } from './utils.js';
 
 export class Game {
-    constructor(renderer = null) {
+    constructor() {
         this.size = 4;
-        this.board = Array.from({ length: this.size }, () => Array(this.size).fill(0));
-        this.score = 0;
-        this.previousBoard = null;
-        this.previousScore = null;
-        this.isOver = false;
-        this.renderer = renderer; 
-
- 
-        const initialCount = Math.random() < 0.5 ? 2 : 3;
-        this.addRandomTiles(initialCount);
+        this.reset();
     }
 
-    savePreviousState() {
-        this.previousBoard = deepCopy(this.board);
-        this.previousScore = this.score;
+    reset() {
+        this.board = Array.from({ length: 4 }, () => Array(4).fill(0));
+        this.score = 0;
+        this.isOver = false;
+        this.previousBoard = null;
+        this.previousScore = null;
+        this.addRandomTile();
+        this.addRandomTile();
     }
 
     addRandomTile() {
-        const empties = [];
-        for (let i = 0; i < this.size; i++) {
-            for (let j = 0; j < this.size; j++) {
-                if (this.board[i][j] === 0) empties.push([i, j]);
-            }
-        }
-        if (empties.length === 0) return false;
-
-        const [x, y] = empties[Math.floor(Math.random() * empties.length)];
-        this.board[x][y] = Math.random() < 0.9 ? 2 : 4;
-        return true;
+        const empty = [];
+        for (let i = 0; i < 4; i++)
+            for (let j = 0; j < 4; j++)
+                if (this.board[i][j] === 0) empty.push([i, j]);
+        if (empty.length === 0) return;
+        const [i, j] = empty[Math.floor(Math.random() * empty.length)];
+        this.board[i][j] = Math.random() < 0.9 ? 2 : 4;
     }
 
-    addRandomTiles(count) {
-        for (let i = 0; i < count; i++) {
-            this.addRandomTile();
-        }
-    }
-
-    move(direction) {
+    move(dir) {
         if (this.isOver) return false;
 
-        this.savePreviousState();
-        const oldBoard = deepCopy(this.board);
+        this.previousBoard = deepCopy(this.board);
+        this.previousScore = this.score;
+
         let moved = false;
-        let addedScore = 0;
+        let scoreAdd = 0;
+        const b = deepCopy(this.board);
 
-        let tempBoard = deepCopy(this.board);
-
-        if (direction === 'left') {
-            [moved, addedScore] = this.slideLeft(tempBoard);
-        } else if (direction === 'right') {
-            tempBoard = this.reverseRows(tempBoard);
-            [moved, addedScore] = this.slideLeft(tempBoard);
-            tempBoard = this.reverseRows(tempBoard);
-        } else if (direction === 'up') {
-            tempBoard = this.transpose(tempBoard);
-            [moved, addedScore] = this.slideLeft(tempBoard);
-            tempBoard = this.transpose(tempBoard);
-        } else if (direction === 'down') {
-            tempBoard = this.transpose(tempBoard);
-            tempBoard = this.reverseRows(tempBoard);
-            [moved, addedScore] = this.slideLeft(tempBoard);
-            tempBoard = this.reverseRows(tempBoard);
-            tempBoard = this.transpose(tempBoard);
-        }
+        if (dir === 'left')  [moved, scoreAdd] = this.slide(b);
+        if (dir === 'right') [moved, scoreAdd] = this.slide(b.map(r => r.reverse())).then(r => r.reverse());
+        if (dir === 'up')    [moved, scoreAdd] = this.slide(this.transpose(b)).then(this.transpose);
+        if (dir === 'down')  [moved, scoreAdd] = this.slide(this.transpose(b).map(r => r.reverse())).then(r => this.transpose(r.map(row => row.reverse())));
 
         if (moved) {
-            this.board = tempBoard;
-            this.score += addedScore;
-
-            if (this.renderer) {
-                const merged = this.getMergedPositions(oldBoard, this.board);
-                this.renderer.markMerges(merged);
-            }
-
-            const newTilesCount = Math.random() < 0.9 ? 1 : 2;
-            this.addRandomTiles(newTilesCount);
-
+            this.board = b;
+            this.score += scoreAdd;
+            this.addRandomTile();
             this.checkGameOver();
             return true;
-        } else {
-            this.previousBoard = null;
-            this.previousScore = null;
-            return false;
         }
+        this.previousBoard = null;
+        this.previousScore = null;
+        return false;
     }
 
-    slideLeft(board) {
+    slide(lines) {
         let moved = false;
-        let score = 0;
-
-        for (let i = 0; i < this.size; i++) {
-            let row = board[i].filter(v => v !== 0);
-            let j = 0;
-            while (j < row.length - 1) {
+        let added = 0;
+        for (let i = 0; i < 4; i++) {
+            let row = lines[i].filter(x => x);
+            for (let j = 0; j < row.length - 1; j++) {
                 if (row[j] === row[j + 1]) {
                     row[j] *= 2;
-                    score += row[j];
+                    added += row[j];
                     row.splice(j + 1, 1);
                     moved = true;
-                } else {
-                    j++;
+                    j--;
                 }
             }
-            while (row.length < this.size) row.push(0);
-
-            if (!board[i].every((v, idx) => v === row[idx])) moved = true;
-            board[i] = row;
+            while (row.length < 4) row.push(0);
+            if (row.join() !== lines[i].join()) moved = true;
+            lines[i] = row;
         }
-        return [moved, score];
+        return [moved, added];
     }
 
-    reverseRows(board) {
-        return board.map(row => row.slice().reverse());
-    }
-
-    transpose(board) {
-        return board[0].map((_, i) => board.map(row => row[i]));
-    }
-
-    getMergedPositions(oldBoard, newBoard) {
-        const merged = [];
-        for (let i = 0; i < this.size; i++) {
-            for (let j = 0; j < this.size; j++) {
-                const oldVal = oldBoard[i][j] || 0;
-                const newVal = newBoard[i][j];
-                if (newVal > oldVal && newVal !== 0) {
-                    merged.push([i, j]);
-                }
-            }
-        }
-        return merged;
+    transpose(b) {
+        return b[0].map((_, i) => b.map(row => row[i]));
     }
 
     checkGameOver() {
-        if (this.hasEmptyCells()) {
-            this.isOver = false;
-            return;
-        }
-        for (let i = 0; i < this.size; i++) {
-            for (let j = 0; j < this.size; j++) {
-                const val = this.board[i][j];
-                if (
-                    (j < 3 && val === this.board[i][j + 1]) ||
-                    (i < 3 && val === this.board[i + 1][j])
-                ) {
-                    this.isOver = false;
+        if (this.board.flat().includes(0)) return;
+        for (let i = 0; i < 4; i++)
+            for (let j = 0; j < 4; j++) {
+                if ((j < 3 && this.board[i][j] === this.board[i][j + 1]) ||
+                    (i < 3 && this.board[i][j] === this.board[i + 1][j]))
                     return;
-                }
             }
-        }
         this.isOver = true;
-    }
-
-    hasEmptyCells() {
-        return this.board.flat().includes(0);
     }
 
     undo() {
         if (!this.previousBoard || this.isOver) return;
-
         this.board = this.previousBoard;
         this.score = this.previousScore;
         this.previousBoard = null;
         this.previousScore = null;
         this.isOver = false;
-    }
-
-    reset() {
-        this.board = Array.from({ length: this.size }, () => Array(this.size).fill(0));
-        this.score = 0;
-        this.previousBoard = null;
-        this.previousScore = null;
-        this.isOver = false;
-
-        const initialCount = Math.random() < 0.5 ? 2 : 3;
-        this.addRandomTiles(initialCount);
     }
 }
