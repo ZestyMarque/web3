@@ -3,7 +3,16 @@ import { handleMove, undoMove, initGame } from './game.js';
 const mobileControls = document.getElementById('mobile-controls');
 
 function initMobileButtons() {
-    if (window.innerWidth > 640) return;
+    if (!mobileControls) return;
+    if (window.innerWidth > 640) {
+        // убираем кнопки на десктопе
+        while (mobileControls.firstChild) mobileControls.removeChild(mobileControls.firstChild);
+        mobileControls.style.display = 'none';
+        return;
+    }
+
+    mobileControls.style.display = 'grid';
+    while (mobileControls.firstChild) mobileControls.removeChild(mobileControls.firstChild);
 
     const buttons = [
         { text: '↑', dir: 'up',    area: 'up' },
@@ -31,16 +40,16 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') { e.preventDefault(); handleMove('right'); }
 });
 
-// Свайпы по полю
-let startX, startY;
-document.getElementById('grid').addEventListener('touchstart', e => {
+// swipe
+let startX = null, startY = null;
+const gridEl = document.getElementById('grid');
+gridEl.addEventListener('touchstart', e => {
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
-    e.preventDefault();
-}, { passive: false });
+}, { passive: true });
 
-document.getElementById('grid').addEventListener('touchend', e => {
-    if (!startX || !startY) return;
+gridEl.addEventListener('touchend', e => {
+    if (startX === null || startY === null) return;
     const endX = e.changedTouches[0].clientX;
     const endY = e.changedTouches[0].clientY;
     const diffX = startX - endX;
@@ -56,5 +65,5 @@ document.getElementById('grid').addEventListener('touchend', e => {
     startY = null;
 });
 
-// Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', initMobileButtons);
+window.addEventListener('resize', initMobileButtons);
