@@ -1,152 +1,86 @@
+// src/js/app.js
 import { Game } from './game.js';
 import { Renderer } from './renderer.js';
 import { Storage } from './storage.js';
 import { setupControls } from './controls.js';
 
-class App {
-    constructor() {
-        this.game = new Game(this.renderer);
-        this.storage = new Storage();
-        this.container = document.getElementById('game-container');
-        this.renderer = new Renderer(this.game, this.container);
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('game-container');
+    const scoreEl = document.getElementById('score');
+    const finalScoreEl = document.getElementById('final-score');
+    const gameOverModal = document.getElementById('game-over');
+    const leaderboardModal = document.getElementById('leaderboard');
 
-        this.scoreElement = document.getElementById('score');
-        this.gameOverModal = document.getElementById('game-over');
-        this.leaderboardModal = document.getElementById('leaderboard');
-        this.mobileControls = document.getElementById('mobile-controls');
+    const game = new Game();
+    const renderer = new Renderer(container);
+    const storage = new Storage();
 
-        this.bindEvents();
-        this.loadGame();
-        this.render();
-        this.updateScore();
-        this.showMobileControlsIfNeeded();
+    // Загрузка сохранённой игры
+    const saved = storage.loadGame();
+    if (saved) {
+        game.board = saved.board;
+        game.score = saved.score;
+        game.previousBoard = saved.previousBoard;
+        game.previousScore = saved.previousScore;
+        game.isOver = saved.isOver;
     }
 
-    bindEvents() {
-        document.getElementById('new-game').addEventListener('click', () => this.newGame());
-        document.getElementById('undo').addEventListener('click', () => this.undo());
-        document.getElementById('leaderboard-btn').addEventListener('click', () => this.showLeaderboard());
+    const update = () => {
+        renderer.render(game.board);
+        scoreEl.textContent = game.score;
+        finalScoreEl.textContent = game.score;
+    };
 
-        document.getElementById('save-score').addEventListener('click', () => this.saveScore());
-        document.getElementById('restart').addEventListener('click', () => this.newGame());
-        document.getElementById('close-leaderboard').addEventListener('click', () => this.hideLeaderboard());
-
-        document.getElementById('player-name').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') this.saveScore();
-        });
-
-        setupControls((direction) => this.move(direction));
-    }
-
-    move(direction) {
-        if (this.game.isOver) return;
-
-        const moved = this.game.move(direction);
-        if (moved) {
-            this.saveGame();
-            this.render();
-            this.updateScore();
-
-            if (this.game.isOver) {
-                this.showGameOver();
-            }
+    const move = dir => {
+        if (game.move(dir)) {
+            storage.saveGame(game);
+            update();
+            if (game.isOver) showGameOver();
         }
-    }
+    };
 
-    undo() {
-        this.game.undo();
-        this.render();
-        this.updateScore();
-        this.saveGame();
-    }
+    setupControls(move);
 
-    newGame() {
-        this.game.reset();
-        this.render();
-        this.updateScore();
-        this.hideGameOver();
-        this.saveGame();
-    }
+    document.getElementById('new-game').onclick = () => {
+        game.reset();
+        storage.clearGame();
+        update();
+        gameOverModal.classList.add('hidden');
+    };
 
-    render() {
-        this.renderer.render();
-    }
+    document.getElementById('undo').onclick = () => {
+        game.undo();
+        update();
+    };
 
-    updateScore() {
-        this.scoreElement.textContent = this.game.score;
-        document.getElementById('final-score').textContent = this.game.score;
-    }
+    document.getElementById('leaderboard-btn').onclick = showLeaderboard;
+    document.getElementById('close-leaderboard').onclick = () => leaderboardModal.classList.add('hidden');
 
-    showGameOver() {
-        this.gameOverModal.classList.remove('hidden');
+    document.getElementById('save-score').onclick = () => {
+        const name = document.getElementById('player-name').value.trim() || 'Аноним';
+        storage.saveRecord(name, game.score);
+        document.getElementById('name-input-container').style.display = 'none';
+        document.getElementById('saved-message').classList.remove('hidden');
+        showLeaderboard();
+    };
+
+    document.getElementById('restart').onclick = () => document.getElementById('new-game').click();
+
+    function showGameOver() {
+        gameOverModal.classList.remove('hidden');
         document.getElementById('player-name').focus();
     }
 
-    hideGameOver() {
-        this.gameOverModal.classList.add('hidden');
-        document.getElementById('player-name').value = '';
-        document.getElementById('saved-message').classList.add('hidden');
-        document.getElementById('name-input-container').style.display = 'block';
-    }
-
-    saveScore() {
-        const nameInput = document.getElementById('player-name');
-        let name = nameInput.value.trim() || 'Аноним';
-
-        this.storage.saveRecord(name, this.game.score);
-        this.showLeaderboard();
-
-        document.getElementById('name-input-container').style.display = 'none';
-        document.getElementById('saved-message').classList.remove('hidden');
-    }
-
-    showLeaderboard() {
-        const tbody = document.querySelector('#leaderboard-table tbody');
+    function showLeaderboard() {
+        const tbody = leaderboardModal.querySelector('tbody');
         tbody.innerHTML = '';
-
-        const records = this.storage.getTop10();
-        records.forEach((rec, index) => {
+        storage.getRecords().forEach((r, i) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${rec.name}</td>
-                <td>${rec.score}</td>
-                <td>${new Date(rec.date).toLocaleDateString('ru-RU')}</td>
-            `;
+            tr.innerHTML = `<td>${i + 1}</td><td>${r.name}</td><td>${r.score}</td><td>${new Date(r.date).toLocaleDateString('ru')}</td>`;
             tbody.appendChild(tr);
         });
-
-        this.leaderboardModal.classList.remove('hidden');
+        leaderboardModal.classList.remove('hidden');
     }
 
-    hideLeaderboard() {
-        this.leaderboardModal.classList.add('hidden');
-    }
-
-    saveGame() {
-        this.storage.saveGame(this.game);
-    }
-
-    loadGame() {
-        const saved = this.storage.loadGame();
-        if (saved) {
-            this.game.board = saved.board;
-            this.game.score = saved.score;
-            this.game.previousBoard = saved.previousBoard || null;
-            this.game.previousScore = saved.previousScore || null;
-            this.game.isOver = saved.isOver || false;
-        }
-    }
-
-    showMobileControlsIfNeeded() {
-        if (window.innerWidth <= 480) {
-            this.mobileControls.classList.remove('hidden');
-        }
-    }
-}
-
-// Запуск приложения
-document.addEventListener('DOMContentLoaded', () => {
-    new App();
+    update();
 });
-
