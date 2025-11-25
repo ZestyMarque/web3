@@ -5,7 +5,7 @@ import { setupControls } from './controls.js';
 
 class App {
     constructor() {
-        this.game = new Game();
+        this.game = new Game(this.renderer);
         this.storage = new Storage();
         this.container = document.getElementById('game-container');
         this.renderer = new Renderer(this.game, this.container);
@@ -149,3 +149,4 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
     new App();
 });
+
