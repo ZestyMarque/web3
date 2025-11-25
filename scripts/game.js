@@ -1,4 +1,3 @@
-// Основные переменные
 let board = [];
 let score = 0;
 let gameOver = false;
@@ -17,20 +16,24 @@ const restartFromModalButton = document.getElementById('restart-from-modal');
 const undoButton = document.getElementById('undo');
 const leaderboardTable = document.getElementById('leaderboard-table');
 
-// Инициализация игры
 function initGame() {
     board = Array(4).fill().map(() => Array(4).fill(0));
     score = 0;
     gameOver = false;
     history = [];
+    createBoard();
     updateScore();
-    renderBoard();
+    updateTiles(board);
     addRandomTile();
     addRandomTile();
     updateLeaderboard();
+    setupKeyboardControls(move);
+    setupTouchControls(move);
+    setupUndoButton(undo);
+    setupRestartButton(initGame);
+    setupSaveScoreButton(saveScore);
 }
 
-// Добавление случайной плитки (2 или 4)
 function addRandomTile() {
     const emptyTiles = [];
     for (let i = 0; i < 4; i++) {
