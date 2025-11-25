@@ -1,0 +1,36 @@
+@keyframes tileAppear {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes tileMerge {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.tile.new {
+    animation: tileAppear 0.25s ease-out;
+}
+
+.tile.merged {
+    animation: tileMerge 0.2s ease-in-out;
+    z-index: 10;
+}
+
+.tile.moving {
+    transition: transform 0.15s ease-out;
+    z-index: 5;
+}
