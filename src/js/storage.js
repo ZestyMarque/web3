@@ -1,5 +1,5 @@
-const GAME_KEY = '2048_current_game';
-const RECORDS_KEY = '2048_leaderboard';
+const GAME_KEY = '2048_game';
+const RECORDS_KEY = '2048_records';
 
 export class Storage {
     saveGame(game) {
@@ -8,8 +8,7 @@ export class Storage {
             score: game.score,
             previousBoard: game.previousBoard,
             previousScore: game.previousScore,
-            isOver: game.isOver,
-            timestamp: Date.now()
+            isOver: game.isOver
         };
         localStorage.setItem(GAME_KEY, JSON.stringify(data));
     }
@@ -17,53 +16,27 @@ export class Storage {
     loadGame() {
         const raw = localStorage.getItem(GAME_KEY);
         if (!raw) return null;
-
         try {
-            const data = JSON.parse(raw);
-            return {
-                board: data.board || null,
-                score: data.score || 0,
-                previousBoard: data.previousBoard || null,
-                previousScore: data.previousScore || null,
-                isOver: data.isOver || false
-            };
-        } catch (e) {
-            console.error('Ошибка загрузки игры:', e);
+            return JSON.parse(raw);
+        } catch {
             return null;
         }
     }
 
     saveRecord(name, score) {
-        const records = this.getAllRecords();
-        records.push({
-            name: name.trim(),
-            score: score,
-            date: new Date().toISOString()
-        });
-
+        let records = this.getRecords();
+        records.push({ name: name.trim() || 'Аноним', score, date: new Date().toISOString() });
         records.sort((a, b) => b.score - a.score);
-        const top10 = records.slice(0, 10);
-
-        localStorage.setItem(RECORDS_KEY, JSON.stringify(top10));
+        records = records.slice(0, 10);
+        localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
     }
 
-    getTop10() {
-        return this.getAllRecords()
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 10);
-    }
-
-    getAllRecords() {
+    getRecords() {
         const raw = localStorage.getItem(RECORDS_KEY);
-        if (!raw) return [];
-        try {
-            return JSON.parse(raw);
-        } catch (e) {
-            return [];
-        }
+        return raw ? JSON.parse(raw) : [];
     }
 
-    clearCurrentGame() {
+    clearGame() {
         localStorage.removeItem(GAME_KEY);
     }
 }
