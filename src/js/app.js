@@ -1,4 +1,3 @@
-// src/js/app.js
 import { Game } from './game.js';
 import { Renderer } from './renderer.js';
 import { Storage } from './storage.js';
