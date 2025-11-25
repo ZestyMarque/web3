@@ -14,7 +14,7 @@ const nameSection = document.getElementById('name-section');
 const newGameModalBtn = document.getElementById('new-game-modal');
 
 function renderLeaderboard() {
-    while (leadersTableBody.firstChild) leadersTableBody.firstChild.remove();
+    while (leadersTableBody.firstChild) leadersTableBody.removeChild(leadersTableBody.firstChild);
     const leaders = getLeaders();
     leaders.forEach((entry, i) => {
         const row = document.createElement('tr');
