@@ -59,11 +59,22 @@
         <button id="show-leaderboard-btn" class="leaderboard-btn">Лидеры</button>
     </div>
 
-    <script type="module" src="storage.js"></script>
-    <script type="module" src="board.js"></script>
-    <script type="module" src="game.js"></script>
-    <script type="module" src="controls.js"></script>
-    <script type="module" src="leaderboard.js"></script>
-    <script type="module" src="main.js"></script>
+    <script type="module">
+        import { initGame } from './board.js';
+        import { showGameOver } from './leaderboard.js';
+        import { loadGame } from './storage.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = loadGame();
+            if (saved) {
+                initGame(false);
+            } else {
+                initGame(true);
+            }
+        });
+
+        window.showGameOver = showGameOver;
+    </script>
 </body>
 </html>
+
