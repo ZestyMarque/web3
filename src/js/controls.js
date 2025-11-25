@@ -1,61 +1,40 @@
-export function setupControls(onMove) {
-    const keyMap = {
-        ArrowUp: 'up',
-        ArrowDown: 'down',
-        ArrowLeft: 'left',
-        ArrowRight: 'right',
-        w: 'up', W: 'up',
-        s: 'down', S: 'down',
-        a: 'left', A: 'left',
-        d: 'right', D: 'right'
+// src/js/controls.js
+export function setupControls(callback) {
+    const map = {
+        ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+        w: 'up', s: 'down', a: 'left', d: 'right'
     };
 
-    document.addEventListener('keydown', (e) => {
-        if (keyMap[e.key]) {
+    document.addEventListener('keydown', e => {
+        if (map[e.key]) {
             e.preventDefault();
-            onMove(keyMap[e.key]);
+            callback(map[e.key]);
         }
     });
 
+    // мобильные кнопки
     document.querySelectorAll('#mobile-controls button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            onMove(btn.dataset.dir);
-        });
+        btn.addEventListener('click', () => callback(btn.dataset.dir));
     });
 
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    const gameContainer = document.getElementById('game-container');
-
-    gameContainer.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
+    // свайпы
+    let sx, sy;
+    const field = document.getElementById('game-container');
+    field.addEventListener('touchstart', e => {
+        sx = e.touches[0].clientX;
+        sy = e.touches[0].clientY;
         e.preventDefault();
     }, { passive: false });
 
-    gameContainer.addEventListener('touchend', (e) => {
-        if (!touchStartX || !touchStartY) return;
-
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
-
-        const diffX = touchEndX - touchStartX;
-        const diffY = touchEndY - touchStartY;
-
-        const minSwipe = 30;
-
-        if (Math.abs(diffX) > Math.abs(diffY)) {
-            if (Math.abs(diffX) > minSwipe) {
-                onMove(diffX > 0 ? 'right' : 'left');
-            }
-        } else {
-            if (Math.abs(diffY) > minSwipe) {
-                onMove(diffY > 0 ? 'down' : 'up');
-            }
+    field.addEventListener('touchend', e => {
+        if (!sx || !sy) return;
+        const dx = e.changedTouches[0].clientX - sx;
+        const dy = e.changedTouches[0].clientY - sy;
+        const absX = Math.abs(dx), absY = Math.abs(dy);
+        if (Math.max(absX, absY) > 30) {
+            if (absX > absY) callback(dx > 0 ? 'right' : 'left');
+            else callback(dy > 0 ? 'down' : 'up');
         }
-
-        touchStartX = 0;
-        touchStartY = 0;
+        sx = sy = null;
     });
 }
