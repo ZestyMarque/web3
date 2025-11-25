@@ -3,108 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Game</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/media.css">
-    <title>2048 Game</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            background-color: #faf8ef;
-        }
-        #game-container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #bbada0;
-            border-radius: 10px;
-        }
-        #board {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin: 20px auto;
-            width: 90%;
-            max-width: 400px;
-            background-color: #bbada0;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .tile {
-            width: 100%;
-            aspect-ratio: 1/1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2em;
-            font-weight: bold;
-            border-radius: 5px;
-            background-color: #cdc1b4;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-        #score {
-            font-size: 1.5em;
-            margin: 10px 0;
-        }
-        #game-over-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            z-index: 100;
-        }
-        #game-over-content {
-            background-color: #bbada0;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        #leaderboard {
-            margin: 20px auto;
-            width: 90%;
-            max-width: 400px;
-            background-color: #bbada0;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            background-color: #8f7a66;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        #name-input {
-            padding: 10px;
-            margin: 10px 0;
-            width: 80%;
-            max-width: 300px;
-        }
-        .controls {
-            display: none;
-            margin: 20px auto;
-            width: 90%;
-            max-width: 300px;
-        }
-        @media (max-width: 768px) {
-            .controls {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-        }
-    </style>
 </head>
 <body>
     <div id="game-container">
@@ -117,8 +18,8 @@
             <button id="down">↓</button>
             <button id="left">←</button>
         </div>
-        <button id="undo">Отменить ход</button>
-        <button id="restart">Начать заново</button>
+        <button id="undo">↩ Отменить ход</button>
+        <button id="restart">🔄 Начать заново</button>
         <div id="leaderboard">
             <h2>Лидерборд</h2>
             <table id="leaderboard-table"></table>
@@ -129,11 +30,10 @@
             <h2>Игра окончена!</h2>
             <p>Ваш счёт: <span id="final-score">0</span></p>
             <input type="text" id="name-input" placeholder="Введите ваше имя">
-            <button id="save-score">Сохранить результат</button>
-            <button id="restart-from-modal">Начать заново</button>
+            <button id="save-score">💾 Сохранить результат</button>
+            <button id="restart-from-modal">🔄 Начать заново</button>
         </div>
     </div>
-    <script src="game.js"></script>
     <script src="board.js"></script>
     <script src="leaderboard.js"></script>
     <script src="storage.js"></script>
@@ -141,5 +41,3 @@
     <script src="game.js"></script>
 </body>
 </html>
-
-
