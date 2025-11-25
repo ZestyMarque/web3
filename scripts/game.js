@@ -2,19 +2,7 @@ let board = [];
 let score = 0;
 let gameOver = false;
 let history = [];
-let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-
-// DOM-элементы
-const boardElement = document.getElementById('board');
-const scoreElement = document.getElementById('score');
-const gameOverModal = document.getElementById('game-over-modal');
-const finalScoreElement = document.getElementById('final-score');
-const nameInput = document.getElementById('name-input');
-const saveScoreButton = document.getElementById('save-score');
-const restartButton = document.getElementById('restart');
-const restartFromModalButton = document.getElementById('restart-from-modal');
-const undoButton = document.getElementById('undo');
-const leaderboardTable = document.getElementById('leaderboard-table');
+let leaderboard = loadLeaderboard();
 
 function initGame() {
     board = Array(4).fill().map(() => Array(4).fill(0));
@@ -32,6 +20,7 @@ function initGame() {
     setupUndoButton(undo);
     setupRestartButton(initGame);
     setupSaveScoreButton(saveScore);
+    document.getElementById('game-over-modal').style.display = 'none';
 }
 
 function addRandomTile() {
@@ -49,45 +38,10 @@ function addRandomTile() {
     }
 }
 
-// Отрисовка игрового поля
-function renderBoard() {
-    boardElement.innerHTML = '';
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            const tile = document.createElement('div');
-            tile.className = 'tile';
-            tile.textContent = board[i][j] !== 0 ? board[i][j] : '';
-            tile.style.backgroundColor = getTileColor(board[i][j]);
-            boardElement.appendChild(tile);
-        }
-    }
-}
-
-// Цвет плитки в зависимости от значения
-function getTileColor(value) {
-    const colors = {
-        0: '#cdc1b4',
-        2: '#eee4da',
-        4: '#ede0c8',
-        8: '#f2b179',
-        16: '#f59563',
-        32: '#f67c5f',
-        64: '#f65e3b',
-        128: '#edcf72',
-        256: '#edcc61',
-        512: '#edc850',
-        1024: '#edc53f',
-        2048: '#edc22e',
-    };
-    return colors[value] || '#3e3933';
-}
-
-// Обновление счёта
 function updateScore() {
-    scoreElement.textContent = `Счёт: ${score}`;
+    document.getElementById('score').textContent = `Счёт: ${score}`;
 }
 
-// Проверка окончания игры
 function isGameOver() {
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
@@ -105,7 +59,6 @@ function isGameOver() {
     return true;
 }
 
-// Сохранение состояния для отмены хода
 function saveState() {
     history.push({
         board: JSON.parse(JSON.stringify(board)),
@@ -113,18 +66,16 @@ function saveState() {
     });
 }
 
-// Отмена хода
 function undo() {
     if (history.length > 0 && !gameOver) {
         const lastState = history.pop();
         board = lastState.board;
         score = lastState.score;
         updateScore();
-        renderBoard();
+        updateTiles(board);
     }
 }
 
-// Обработка движения
 function move(direction) {
     if (gameOver) return;
     saveState();
@@ -145,18 +96,17 @@ function move(direction) {
     }
     if (moved) {
         addRandomTile();
-        renderBoard();
+        updateTiles(board);
         if (isGameOver()) {
             gameOver = true;
-            finalScoreElement.textContent = score;
-            gameOverModal.style.display = 'flex';
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('game-over-modal').style.display = 'flex';
         }
     } else {
         history.pop();
     }
 }
 
-// Движение влево
 function moveLeft() {
     let moved = false;
     for (let i = 0; i < 4; i++) {
@@ -184,7 +134,6 @@ function moveLeft() {
     return moved;
 }
 
-// Движение вправо
 function moveRight() {
     let moved = false;
     for (let i = 0; i < 4; i++) {
@@ -212,7 +161,6 @@ function moveRight() {
     return moved;
 }
 
-// Движение вверх
 function moveUp() {
     let moved = false;
     for (let j = 0; j < 4; j++) {
@@ -247,7 +195,6 @@ function moveUp() {
     return moved;
 }
 
-// Движение вниз
 function moveDown() {
     let moved = false;
     for (let j = 0; j < 4; j++) {
@@ -282,71 +229,13 @@ function moveDown() {
     return moved;
 }
 
-// Сохранение рекорда
 function saveScore() {
-    const name = nameInput.value.trim();
+    const name = document.getElementById('name-input').value.trim();
     if (name) {
-        leaderboard.push({ name, score, date: new Date().toLocaleString() });
-        leaderboard.sort((a, b) => b.score - a.score);
-        if (leaderboard.length > 10) {
-            leaderboard = leaderboard.slice(0, 10);
-        }
-        localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-        updateLeaderboard();
-        nameInput.value = '';
-        gameOverModal.style.display = 'none';
+        addToLeaderboard(name, score);
+        document.getElementById('name-input').value = '';
+        document.getElementById('game-over-modal').style.display = 'none';
     }
 }
 
-// Обновление таблицы лидеров
-function updateLeaderboard() {
-    leaderboardTable.innerHTML = '';
-    leaderboard.forEach(entry => {
-        const row = document.createElement('tr');
-        const nameCell = document.createElement('td');
-        nameCell.textContent = entry.name;
-        const scoreCell = document.createElement('td');
-        scoreCell.textContent = entry.score;
-        const dateCell = document.createElement('td');
-        dateCell.textContent = entry.date;
-        row.appendChild(nameCell);
-        row.appendChild(scoreCell);
-        row.appendChild(dateCell);
-        leaderboardTable.appendChild(row);
-    });
-}
-
-// Обработчики событий
-document.addEventListener('keydown', (e) => {
-    if (!gameOver) {
-        switch (e.key) {
-            case 'ArrowUp':
-                move('up');
-                break;
-            case 'ArrowDown':
-                move('down');
-                break;
-            case 'ArrowLeft':
-                move('left');
-                break;
-            case 'ArrowRight':
-                move('right');
-                break;
-        }
-    }
-});
-
-document.getElementById('up').addEventListener('click', () => move('up'));
-document.getElementById('down').addEventListener('click', () => move('down'));
-document.getElementById('left').addEventListener('click', () => move('left'));
-document.getElementById('right').addEventListener('click', () => move('right'));
-undoButton.addEventListener('click', undo);
-restartButton.addEventListener('click', initGame);
-restartFromModalButton.addEventListener('click', () => {
-    gameOverModal.style.display = 'none';
-    initGame();
-});
-saveScoreButton.addEventListener('click', saveScore);
-
-// Запуск игры
 initGame();
