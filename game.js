@@ -19,16 +19,17 @@ export function initGame(isNew = true) {
             grid = saved.grid;
             score = saved.score;
             document.getElementById('score').textContent = score;
-            saved.tiles.forEach(t => {
-                const tile = createTile(t.value, t.x, t.y);
-                setPosition(tile, t.x, t.y);
-            });
+            if (Array.isArray(saved.tiles)) {
+                saved.tiles.forEach(t => {
+                    createTile(t.value, t.x, t.y);
+                });
+            }
         }
     }
 
     if (grid.flat().every(v => v === 0)) {
-        addRandomTile();
-        addRandomTile();
+        const startCount = Math.floor(Math.random() * 3) + 1; // 1-3 стартовых плитки
+        for (let i = 0; i < startCount; i++) addRandomTile();
     }
 
     saveState();
@@ -45,6 +46,8 @@ function saveState() {
         score
     };
     history.push(state);
+    // ограничим историю до 50 состояний
+    if (history.length > 50) history.shift();
     saveGame(state);
 }
 
@@ -57,8 +60,7 @@ export function undoMove() {
     document.getElementById('score').textContent = score;
     clearAllTiles();
     prev.tiles.forEach(t => {
-        const tile = createTile(t.value, t.x, t.y);
-        setPosition(tile, t.x, t.y);
+        createTile(t.value, t.x, t.y);
     });
 }
 
@@ -76,7 +78,7 @@ function addRandomTile() {
 }
 
 function rotateGrid() {
-    const newGrid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
+    const newGrid = Array.from({length: GRID_SIZE}, () => Array(GRID_SIZE).fill(0));
     for (let y = 0; y < GRID_SIZE; y++)
         for (let x = 0; x < GRID_SIZE; x++)
             newGrid[x][GRID_SIZE - 1 - y] = grid[y][x];
@@ -105,23 +107,14 @@ function moveLeft() {
 }
 
 function applyVisualMoves() {
-    tiles.forEach(tile => {
-        const x = Number(tile.dataset.x);
-        const y = Number(tile.dataset.y);
-        const value = Number(tile.dataset.value);
-        let found = false;
-        for (let ny = 0; ny < GRID_SIZE; ny++) {
-            for (let nx = 0; nx < GRID_SIZE; nx++) {
-                if (grid[ny][nx] === value) {
-                    if (nx !== x || ny !== y) moveTile(tile, nx, ny);
-                    found = true;
-                    break;
-                }
-            }
-            if (found) break;
+    // простая, надёжная стратегия: полностью перерисовать плитки из grid
+    clearAllTiles();
+    for (let y = 0; y < GRID_SIZE; y++) {
+        for (let x = 0; x < GRID_SIZE; x++) {
+            const v = grid[y][x];
+            if (v) createTile(v, x, y);
         }
-        if (!found) removeTile(tile);
-    });
+    }
 }
 
 export function handleMove(dir) {
@@ -140,7 +133,7 @@ export function handleMove(dir) {
         applyVisualMoves();
         addRandomTile();
         saveState();
-        if (!hasMoves()) setTimeout(() => window.showGameOver(score), 500);
+        if (!hasMoves()) setTimeout(() => window.showGameOver && window.showGameOver(score), 500);
     }
 }
 
@@ -148,6 +141,6 @@ function hasMoves() {
     if (grid.flat().includes(0)) return true;
     for (let y = 0; y < GRID_SIZE; y++)
         for (let x = 0; x < GRID_SIZE; x++)
-            if (x < 3 && grid[y][x] === grid[y][x+1] || y < 3 && grid[y][x] === grid[y+1][x]) return true;
+            if ((x < 3 && grid[y][x] === grid[y][x+1]) || (y < 3 && grid[y][x] === grid[y+1][x])) return true;
     return false;
 }
